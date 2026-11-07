@@ -2,7 +2,7 @@
 
 ## Objetivo e escopo atual
 
-Continuar o diagnóstico autorizado da fechadura hoteleira Saga Systems fotografada pelo usuário, com placa identificada visualmente como HB2546. O protocolo BLE de abertura, firmware, UUIDs reais e autenticação ainda não foram identificados.
+Continuar o diagnóstico autorizado da fechadura hoteleira Saga Systems, com placa identificada pelo usuário como HB2546. A Saga informou ao operador que seus módulos BLE funcionam com TTLock. O fluxo oficial encontrado é eKey pelo SDK móvel TTLock; firmware/provisionamento da unidade e eKey autorizada ainda precisam ser confirmados.
 
 O programa em src/SagaBle.Diagnostic utiliza o rádio BLE do Windows. O computador com o Bluetooth é o do operador, não a máquina do GitHub Actions.
 
@@ -16,7 +16,8 @@ O programa em src/SagaBle.Diagnostic utiliza o rádio BLE do Windows. O computad
 6. Na tarefa 00, o usuário escolhe um dispositivo visto na varredura. Na tarefa 06, use somente um nome BLE exato e único informado pelo operador; o GATT inicia no primeiro anúncio conectável correspondente. Não deduza identidade somente pelo RSSI, nome ou UUID.
 7. A consulta GATT é exclusivamente de metadados. Não faça ReadValue, WriteValue, pareamento automático, reset, brute-force ou destravamento.
 8. A análise de JSON pode ser feita com Saga BLE: 05 - Validar estrutura de um relatório.
-9. Para avançar à abertura, obtenha SDK oficial e credenciais/provisionamento legítimo. Não invente protocolo.
+9. Para avançar à abertura, use somente o SDK oficial TTLock e uma eKey/provisionamento legítimos. O protocolo Bluetooth é encapsulado pelo SDK móvel Android/iOS; não faça escrita GATT no scanner Windows.
+10. Não execute `initLock`, reset, exclusão ou configuração na fechadura existente do hotel. Só avançar após confirmar que a unidade está em bancada ou fora de ocupação, há cartão físico reserva e a operação foi provisionada oficialmente.
 
 ## Definição de sucesso nesta fase
 
