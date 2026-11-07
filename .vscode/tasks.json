@@ -1,0 +1,68 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Saga BLE: autoteste sem fechadura",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "${workspaceFolder}/src/SagaBle.Diagnostic/SagaBle.Diagnostic.csproj",
+        "-c",
+        "Release",
+        "--",
+        "--self-test"
+      ],
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "Saga BLE: varredura automática (30 segundos)",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "${workspaceFolder}/src/SagaBle.Diagnostic/SagaBle.Diagnostic.csproj",
+        "-c",
+        "Release",
+        "--",
+        "--scan",
+        "30",
+        "--export",
+        "${workspaceFolder}/diagnostics/saga-scan.json"
+      ],
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "Saga BLE: inspecionar endereço (30 segundos)",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "${workspaceFolder}/src/SagaBle.Diagnostic/SagaBle.Diagnostic.csproj",
+        "-c",
+        "Release",
+        "--",
+        "--scan",
+        "30",
+        "--inspect",
+        "${input:sagaBleAddress}",
+        "--export",
+        "${workspaceFolder}/diagnostics/saga-gatt.json"
+      ],
+      "problemMatcher": [],
+      "group": "test"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "sagaBleAddress",
+      "type": "promptString",
+      "description": "Endereço BLE detectado (AA:BB:CC:DD:EE:FF); a ferramenta NÃO enviará comando de abertura"
+    }
+  ]
+}
