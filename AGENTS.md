@@ -13,7 +13,7 @@ O programa em src/SagaBle.Diagnostic utiliza o rádio BLE do Windows. O computad
 3. Confirme fechadura de testes autorizada, fora de ocupação e mantenha cartão físico de reserva.
 4. Execute no VS Code a tarefa Saga BLE: 02 - Testes completos offline (sem fechadura).
 5. Depois execute Saga BLE: 00 - Diagnóstico completo (guiado) no próprio Windows ao lado da fechadura.
-6. O usuário escolherá um dispositivo visto na varredura. Não deduza identidade somente pelo RSSI, nome ou UUID.
+6. Na tarefa 00, o usuário escolhe um dispositivo visto na varredura. Na tarefa 06, use somente um nome BLE exato e único informado pelo operador; o GATT inicia no primeiro anúncio conectável correspondente. Não deduza identidade somente pelo RSSI, nome ou UUID.
 7. A consulta GATT é exclusivamente de metadados. Não faça ReadValue, WriteValue, pareamento automático, reset, brute-force ou destravamento.
 8. A análise de JSON pode ser feita com Saga BLE: 05 - Validar estrutura de um relatório.
 9. Para avançar à abertura, obtenha SDK oficial e credenciais/provisionamento legítimo. Não invente protocolo.

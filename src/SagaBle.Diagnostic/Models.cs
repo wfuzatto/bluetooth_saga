@@ -15,6 +15,12 @@ public sealed class DeviceRecord
     public DateTimeOffset FirstSeenUtc { get; set; }
     public DateTimeOffset LastSeenUtc { get; set; }
     public int Advertisements { get; set; }
+    public int ConnectableAdvertisements { get; set; }
+    public int ScannableAdvertisements { get; set; }
+    public int DirectedAdvertisements { get; set; }
+    public int ScanResponseAdvertisements { get; set; }
+    public List<string> AdvertisementTypes { get; set; } = new();
+    public List<string> AddressTypes { get; set; } = new();
     public List<string> ServiceUuids { get; set; } = new();
     public List<ManufacturerRecord> ManufacturerData { get; set; } = new();
 }

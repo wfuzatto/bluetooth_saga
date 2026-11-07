@@ -45,6 +45,48 @@ internal static class Program
                 }
 
                 int seconds = (args.Length > 1 && int.TryParse(args[1], out var parsed)) ? parsed : 20;
+
+                int inspectNameIndex = Array.IndexOf(args, "--inspect-name");
+                if (inspectNameIndex >= 0)
+                {
+                    if (inspectNameIndex + 1 >= args.Length || string.IsNullOrWhiteSpace(args[inspectNameIndex + 1]))
+                    {
+                        Console.Error.WriteLine("Use --inspect-name NOME_EXATO_ANUNCIADO.");
+                        return 2;
+                    }
+
+                    var targetName = args[inspectNameIndex + 1];
+                    Console.WriteLine($"Aguardando anúncio conectável com o nome exato '{targetName}' por até {seconds} segundos.");
+                    var address = await ble.ScanForConnectableNameAsync(seconds, targetName);
+                    PrintDevices(ble.Snapshot());
+                    if (address is null)
+                    {
+                        Console.WriteLine("Anúncio conectável correspondente não foi observado; GATT não foi tentado.");
+                        int nameExportIndex = Array.IndexOf(args, "--export");
+                        var namePath = nameExportIndex >= 0 && nameExportIndex + 1 < args.Length ? args[nameExportIndex + 1] : null;
+                        Save(ble, inspections, namePath);
+                        return 3;
+                    }
+
+                    Console.WriteLine($"Anúncio conectável confirmado para {Addressing.Format(address.Value)}; iniciando descoberta GATT apenas de metadados.");
+                    var nameInspection = await ble.InspectAsync(address.Value);
+                    inspections.Add(nameInspection);
+                    Console.WriteLine($"Dispositivo: {nameInspection.Address}; nome: {nameInspection.Name}; status: {nameInspection.Status}");
+                    foreach (var service in nameInspection.Services)
+                    {
+                        Console.WriteLine($"Serviço {service.Uuid}: {service.Status}");
+                        foreach (var characteristic in service.Characteristics)
+                            Console.WriteLine($"  {characteristic.Uuid} | {characteristic.Properties} | handle {characteristic.Handle}");
+                    }
+
+                    int nameResultExportIndex = Array.IndexOf(args, "--export");
+                    var nameResultPath = nameResultExportIndex >= 0 && nameResultExportIndex + 1 < args.Length
+                        ? args[nameResultExportIndex + 1]
+                        : null;
+                    Save(ble, inspections, nameResultPath);
+                    return nameInspection.Status != "Success" ? 4 : 0;
+                }
+
                 await ScanAndShowAsync(ble, seconds);
 
                 int inspectIndex = Array.IndexOf(args, "--inspect");
@@ -144,13 +186,15 @@ internal static class Program
     private static void PrintDevices(List<DeviceRecord> devices)
     {
         Console.WriteLine($"\nDispositivos únicos observados: {devices.Count}");
-        Console.WriteLine("  Nº  RSSI   Endereço Bluetooth      Nome             Serviços anunciados");
+        Console.WriteLine("  Nº  RSSI   Endereço Bluetooth      Nome             Serviços  Anúncios  Conectáveis");
         for (int i = 0; i < devices.Count; i++)
         {
             var d = devices[i];
             string name = string.IsNullOrWhiteSpace(d.Name) ? "(sem nome)" : d.Name;
             if (name.Length > 18) name = name[..18];
-            Console.WriteLine($" {i + 1,3} {d.RssiDbm,5}  {d.Address,-23} {name,-18} {d.ServiceUuids.Count}");
+            Console.WriteLine($" {i + 1,3} {d.RssiDbm,5}  {d.Address,-23} {name,-18} {d.ServiceUuids.Count,8} {d.Advertisements,9} {d.ConnectableAdvertisements,11}");
+            if (d.AdvertisementTypes.Count > 0)
+                Console.WriteLine($"       Tipos: {string.Join(", ", d.AdvertisementTypes)}; endereços: {string.Join(", ", d.AddressTypes)}; scan responses: {d.ScanResponseAdvertisements}");
         }
         if (devices.Count == 0)
             Console.WriteLine("Nenhum anúncio BLE. Aproxime o PC, confira alimentação e se o módulo anuncia BLE.");
@@ -224,6 +268,7 @@ internal static class Program
         Console.WriteLine("SagaBleDiagnostico.exe --scan 30   varredura por 30 segundos e sai");
         Console.WriteLine("SagaBleDiagnostico.exe --scan 30 --export C:\\Temp\\saga.json");
         Console.WriteLine("SagaBleDiagnostico.exe --scan 30 --inspect AA:BB:CC:DD:EE:FF --export C:\\Temp\\saga.json");
+        Console.WriteLine("SagaBleDiagnostico.exe --scan 120 --inspect-name \"exact advertised name\" --export C:\\Temp\\saga.json");
         Console.WriteLine("SagaBleDiagnostico.exe --self-test valida utilitários sem hardware");
     }
 }
