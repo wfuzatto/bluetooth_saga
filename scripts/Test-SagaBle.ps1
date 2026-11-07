@@ -55,17 +55,22 @@ try {
     Write-Host "Sistema: $([Environment]::OSVersion.VersionString)"
     Write-Host "Projeto: $project"
 
-    $adapters = @()
-    try {
-        $adapters = @(Get-PnpDevice -Class Bluetooth -ErrorAction Stop |
-            Where-Object { $_.Status -eq 'OK' })
-        Write-Host "Dispositivos Bluetooth do Windows com status OK: $($adapters.Count)"
-        if ($adapters.Count -eq 0) {
-            Write-Warning "Nenhum dispositivo na classe Bluetooth com status OK. Confirme driver/rádio no Windows."
+    if (-not $OfflineOnly) {
+        $adapters = @()
+        try {
+            $adapters = @(Get-PnpDevice -Class Bluetooth -ErrorAction Stop |
+                Where-Object { $_.Status -eq 'OK' })
+            Write-Host "Dispositivos Bluetooth do Windows com status OK: $($adapters.Count)"
+            if ($adapters.Count -eq 0) {
+                Write-Warning "Nenhum dispositivo na classe Bluetooth com status OK. Confirme driver/rádio no Windows."
+            }
+        }
+        catch {
+            Write-Warning "Não foi possível listar adaptadores por Get-PnpDevice. O scanner C# fará sua própria verificação."
         }
     }
-    catch {
-        Write-Warning "Não foi possível listar adaptadores por Get-PnpDevice. O scanner C# fará sua própria verificação."
+    else {
+        Write-Host "Modo offline: sem consulta ao adaptador Bluetooth."
     }
 
     if ($PreflightOnly) {
@@ -163,6 +168,6 @@ try {
     Write-Host "Os arquivos contêm identificadores BLE. NÃO faça upload público." -ForegroundColor Yellow
 }
 catch {
-    Write-Error ("Teste interrompido: " + $_.Exception.Message)
+    [Console]::Error.WriteLine("Teste interrompido: " + $_.Exception.Message)
     exit 1
 }
