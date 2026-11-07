@@ -2,7 +2,7 @@
 
 Ferramenta Windows C#/.NET para diagnóstico do módulo fotografado HB2546 em fechadura hoteleira Saga Systems. Preserva a operação de cartões MIFARE/BIS Hotel, sem alterar a fechadura.
 
-**Situação atual:** scanner Bluetooth LE, identificação de anúncios, inspeção de metadados GATT, exportação local de JSON, tarefas VS Code e testes offline. **Não abre portas ainda.** O protocolo e a credencial de abertura oficial da placa não foram identificados.
+**Situação atual:** scanner Bluetooth LE, identificação de anúncios, inspeção de metadados GATT, exportação local de JSON, tarefas VS Code e testes offline. A Saga informou que seus módulos BLE funcionam com TTLock; a rota documentada usa o SDK móvel oficial e eKey. **Este repositório ainda não implementa nem testou abertura.**
 
 ## Comece aqui no VS Code
 
@@ -44,12 +44,13 @@ Para teste local também é possível abrir um terminal PowerShell:
 - AGENTS.md — procedimentos e limites para agentes de programação no VS Code.
 - docs/TESTE_LOCAL_VSCODE.md — manual completo, incluindo falhas e interpretações.
 - docs/INTEGRACAO_ABERTURA.md — contrato da futura abertura homologada.
+- docs/INTEGRACAO_TTLOCK.md — fluxo eKey/SDK, pré-requisitos e limites para o teste autorizado.
 - docs/PROTOCOL_AND_SECURITY.md — roteiro de identificação e segurança.
 
 ## Executável compilado no GitHub
 
 Acesse https://github.com/wfuzatto/bluetooth_saga/actions e abra a execução concluída do workflow **Compilar e testar diagnóstico Bluetooth Saga**. Em Artifacts, baixe SagaBleDiagnostico-Windows-x64 (ZIP), extraia o EXE e rode no PC Windows com BLE. O EXE é autossuficiente, mas as tarefas de VS Code baseadas em código-fonte exigem SDK .NET 10.
 
-**Limitações importantes:** o GitHub Actions roda em máquina remota sem acesso ao Bluetooth deste hotel. A compilação e o teste com dados sintéticos não substituem um teste físico, não demonstram abertura e não identificam o protocolo do módulo. A integração de abertura só pode avançar após a especificação e o provisionamento/autorização oficial da Saga/VEGA.
+**Limitações importantes:** o GitHub Actions roda em máquina remota sem acesso ao Bluetooth deste hotel. A compilação e o teste com dados sintéticos não substituem um teste físico nem demonstram abertura. O projeto C# usa BLE do Windows para metadados; não é o SDK TTLock móvel e não transmite comandos. A integração só pode avançar com provisionamento e eKey autorizada, usando o SDK oficial e um teste seguro.
 
 Não execute comandos arbitrários, scripts que escrevam em características GATT, tentativa de PIN ou reset. Nunca publique PIN, chaves digitais, dados de hóspedes, endereços BLE ou logs brutos no repositório público.

@@ -14,7 +14,8 @@ O leitor de cartões MIFARE e a plataforma BIS Hotel existente devem continuar f
 - [x] Configuração de compilação automática de EXE com GitHub Actions
 - [ ] Teste físico em uma fechadura autorizada
 - [ ] Identificação do fabricante/firmware do HB2546
-- [ ] Documentação oficial do protocolo de abertura ou SDK homologado
+- [x] Documentação oficial do fluxo TTLock eKey/SDK recebida; Saga informou compatibilidade dos módulos BLE com TTLock
+- [ ] Confirmação da compatibilidade deste firmware/unidade com TTLock e do provisionamento existente
 - [ ] Provisionamento de credencial temporária por hóspede
 - [ ] Comando de abertura autenticado
 - [ ] Integração com BIS Hotel e reservas
@@ -27,7 +28,7 @@ O leitor de cartões MIFARE e a plataforma BIS Hotel existente devem continuar f
 3. Não tentar códigos PIN por força bruta, comandos de abertura aleatórios, reset de firmware ou alteração elétrica de pinos.
 4. Pareamento, emissão e revogação de credenciais devem usar método oficialmente autorizado.
 5. Nunca salvar PIN, chaves criptográficas ou credenciais de hóspedes no GitHub.
-6. A ferramenta não prova compatibilidade com VSKey, TTLock nem outro protocolo.
+6. A ferramenta Windows não implementa TTLock nem prova, por si só, a compatibilidade do firmware/provisionamento da unidade. A Saga indicou ao operador a rota TTLock.
 
 ## Dados para homologação com Saga/VEGA
 
@@ -40,6 +41,10 @@ Solicitar ao fabricante:
 - API de emissão de chave digital para reservas e eventual licenciamento.
 - Dependência de internet e tratamento de horários/relógios.
 - Possibilidade de coexistência com cartão MIFARE/BIS Hotel e procedimento seguro de recuperação.
+
+## Caminho TTLock documentado
+
+O TTLock encapsula os comandos Bluetooth no SDK móvel Android/iOS e usa eKey provisionada. Não testar bytes por GATT. Ver [docs/INTEGRACAO_TTLOCK.md](INTEGRACAO_TTLOCK.md) antes de avançar.
 
 ## Procedimento físico de diagnóstico
 
