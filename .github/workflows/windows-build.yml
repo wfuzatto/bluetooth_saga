@@ -1,0 +1,34 @@
+name: Compilar diagnóstico Bluetooth Windows
+
+on:
+  push:
+    branches:
+      - main
+      - feature/**
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Windows x64 - build, self-test e EXE
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Restaurar
+        run: dotnet restore src/SagaBle.Diagnostic/SagaBle.Diagnostic.csproj
+      - name: Compilar
+        run: dotnet build src/SagaBle.Diagnostic/SagaBle.Diagnostic.csproj --configuration Release --no-restore
+      - name: Autotestes sem hardware
+        run: dotnet run --project src/SagaBle.Diagnostic/SagaBle.Diagnostic.csproj --configuration Release --no-build -- --self-test
+      - name: Publicar executável Windows x64 único e autossuficiente
+        run: dotnet publish src/SagaBle.Diagnostic/SagaBle.Diagnostic.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishTrimmed=false --output dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SagaBleDiagnostico-Windows-x64
+          path: dist/SagaBleDiagnostico.exe
+          if-no-files-found: error
