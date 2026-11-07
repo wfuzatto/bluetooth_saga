@@ -1,0 +1,32 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Saga BLE: depurar scanner (30s)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "Saga BLE: compilar (Debug)",
+      "program": "${workspaceFolder}/src/SagaBle.Diagnostic/bin/Debug/net10.0-windows10.0.19041.0/SagaBleDiagnostico.dll",
+      "args": [
+        "--scan",
+        "30",
+        "--export",
+        "${workspaceFolder}/diagnostics/saga-debug.json"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "stopAtEntry": false
+    },
+    {
+      "name": "Saga BLE: depurar modo interativo",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "Saga BLE: compilar (Debug)",
+      "program": "${workspaceFolder}/src/SagaBle.Diagnostic/bin/Debug/net10.0-windows10.0.19041.0/SagaBleDiagnostico.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "stopAtEntry": false
+    }
+  ]
+}

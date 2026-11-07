@@ -2,67 +2,151 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Saga BLE: autoteste sem fechadura",
+      "label": "Saga BLE: 00 - Diagnóstico completo (guiado)",
       "type": "process",
-      "command": "dotnet",
+      "command": "powershell.exe",
       "args": [
-        "run",
-        "--project",
-        "${workspaceFolder}/src/SagaBle.Diagnostic/SagaBle.Diagnostic.csproj",
-        "-c",
-        "Release",
-        "--",
-        "--self-test"
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/Test-SagaBle.ps1",
+        "-Seconds",
+        "30"
+      ],
+      "problemMatcher": [],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "Saga BLE: 01 - Pré-requisitos Windows",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/Test-SagaBle.ps1",
+        "-PreflightOnly"
       ],
       "problemMatcher": [],
       "group": "test"
     },
     {
-      "label": "Saga BLE: varredura automática (30 segundos)",
+      "label": "Saga BLE: 02 - Testes completos offline (sem fechadura)",
       "type": "process",
-      "command": "dotnet",
+      "command": "powershell.exe",
       "args": [
-        "run",
-        "--project",
-        "${workspaceFolder}/src/SagaBle.Diagnostic/SagaBle.Diagnostic.csproj",
-        "-c",
-        "Release",
-        "--",
-        "--scan",
-        "30",
-        "--export",
-        "${workspaceFolder}/diagnostics/saga-scan.json"
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/Test-SagaBle.ps1",
+        "-OfflineOnly"
       ],
       "problemMatcher": [],
       "group": "test"
     },
     {
-      "label": "Saga BLE: inspecionar endereço (30 segundos)",
+      "label": "Saga BLE: 03 - Somente varredura (sem interação)",
       "type": "process",
-      "command": "dotnet",
+      "command": "powershell.exe",
       "args": [
-        "run",
-        "--project",
-        "${workspaceFolder}/src/SagaBle.Diagnostic/SagaBle.Diagnostic.csproj",
-        "-c",
-        "Release",
-        "--",
-        "--scan",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/Test-SagaBle.ps1",
+        "-Seconds",
         "30",
-        "--inspect",
+        "-NonInteractive"
+      ],
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "Saga BLE: 04 - Inspecionar GATT com endereço escolhido",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/Test-SagaBle.ps1",
+        "-Seconds",
+        "30",
+        "-Address",
         "${input:sagaBleAddress}",
-        "--export",
-        "${workspaceFolder}/diagnostics/saga-gatt.json"
+        "-NonInteractive"
       ],
       "problemMatcher": [],
       "group": "test"
+    },
+    {
+      "label": "Saga BLE: 05 - Validar estrutura de um relatório",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/Analyze-Report.ps1",
+        "-Path",
+        "${input:sagaBleReport}"
+      ],
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "Saga BLE: compilar (Debug)",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/SagaBle.Diagnostic/SagaBle.Diagnostic.csproj",
+        "--configuration",
+        "Debug",
+        "--nologo"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    },
+    {
+      "label": "Saga BLE: compilar (Release)",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/SagaBle.Diagnostic/SagaBle.Diagnostic.csproj",
+        "--configuration",
+        "Release",
+        "--nologo"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
     }
   ],
   "inputs": [
     {
       "id": "sagaBleAddress",
       "type": "promptString",
-      "description": "Endereço BLE detectado (AA:BB:CC:DD:EE:FF); a ferramenta NÃO enviará comando de abertura"
+      "description": "Endereço observado no scanner (AA:BB:CC:DD:EE:FF). NÃO realiza abertura."
+    },
+    {
+      "id": "sagaBleReport",
+      "type": "promptString",
+      "description": "Caminho do JSON local a validar",
+      "default": "diagnostics/saga-scan.json"
     }
   ]
 }

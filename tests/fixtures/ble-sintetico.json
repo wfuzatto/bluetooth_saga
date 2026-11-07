@@ -1,0 +1,52 @@
+{
+  "Project": "bluetooth_saga",
+  "Mode": "somente leitura / metadados BLE e GATT",
+  "GeneratedUtc": "2026-01-01T00:00:00Z",
+  "Devices": [
+    {
+      "AddressValue": 187723572702975,
+      "Address": "AA:BB:CC:DD:EE:FF",
+      "Name": "EXEMPLO-DISPOSITIVO-1",
+      "RssiDbm": -40,
+      "FirstSeenUtc": "2026-01-01T00:00:00Z",
+      "LastSeenUtc": "2026-01-01T00:00:20Z",
+      "Advertisements": 8,
+      "ServiceUuids": [
+        "00001800-0000-1000-8000-00805f9b34fb"
+      ],
+      "ManufacturerData": []
+    },
+    {
+      "AddressValue": 187723572702976,
+      "Address": "AA:BB:CC:DD:EF:00",
+      "Name": "EXEMPLO-DISPOSITIVO-2",
+      "RssiDbm": -72,
+      "FirstSeenUtc": "2026-01-01T00:00:00Z",
+      "LastSeenUtc": "2026-01-01T00:00:20Z",
+      "Advertisements": 1,
+      "ServiceUuids": [],
+      "ManufacturerData": []
+    }
+  ],
+  "Inspections": [
+    {
+      "Address": "AA:BB:CC:DD:EE:FF",
+      "Name": "EXEMPLO-DISPOSITIVO-1",
+      "Status": "Success",
+      "InspectedUtc": "2026-01-01T00:00:20Z",
+      "Services": [
+        {
+          "Uuid": "00001800-0000-1000-8000-00805f9b34fb",
+          "Status": "Success",
+          "Characteristics": [
+            {
+              "Uuid": "00002a00-0000-1000-8000-00805f9b34fb",
+              "Properties": "Read",
+              "Handle": 3
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
