@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+dist/
+.vs/
+*.user
+*.suo
+*.log
+Relatorios/
+reports/
+diagnostics/
+saga-ble-*.json
+*.secrets.json
+.env
