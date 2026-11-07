@@ -16,7 +16,7 @@ function Step([string]$Message) {
     Write-Host ("=== " + $Message + " ===") -ForegroundColor Cyan
 }
 
-function DotNet([string[]]$Arguments) {
+function Invoke-DotNetCommand([string[]]$Arguments) {
     & dotnet @Arguments
     if ($LASTEXITCODE -ne 0) {
         throw ("dotnet falhou (código " + $LASTEXITCODE + "): " + ($Arguments -join " "))
@@ -79,10 +79,10 @@ try {
     }
 
     Step "Compilar a ferramenta"
-    DotNet @('build',$project,'--configuration','Release','--nologo')
+    Invoke-DotNetCommand @('build',$project,'--configuration','Release','--nologo')
 
     Step "Autotestes locais, sem hardware"
-    DotNet @('run','--project',$project,'--configuration','Release','--no-build','--','--self-test')
+    Invoke-DotNetCommand @('run','--project',$project,'--configuration','Release','--no-build','--','--self-test')
 
     Step "Teste de análise com dados sintéticos"
     if (-not (Test-Path -LiteralPath $fixture)) {
@@ -101,7 +101,7 @@ try {
     $scanPath = Join-Path $reports ("scan-" + $stamp + ".json")
 
     Step "Escanear Bluetooth Low Energy por $Seconds segundos"
-    DotNet @('run','--project',$project,'--configuration','Release','--no-build','--',
+    Invoke-DotNetCommand @('run','--project',$project,'--configuration','Release','--no-build','--',
         '--scan',"$Seconds",'--export',$scanPath)
 
     $scan = Get-Content -LiteralPath $scanPath -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -154,7 +154,7 @@ try {
     Step "Descoberta GATT de $selected (somente metadados)"
     Write-Host "Segunda varredura necessária: confirma que o endereço ainda está anunciando."
     $gattPath = Join-Path $reports ("gatt-" + $stamp + ".json")
-    DotNet @('run','--project',$project,'--configuration','Release','--no-build','--',
+    Invoke-DotNetCommand @('run','--project',$project,'--configuration','Release','--no-build','--',
         '--scan',"$Seconds",'--inspect',$selected,'--export',$gattPath)
 
     Step "Validar resultado GATT"
