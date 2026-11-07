@@ -4,6 +4,25 @@ Projeto de integração para fechadura Saga Systems com módulo fotografado **HB
 
 **Estado real:** o diagnóstico BLE foi implementado no código. A abertura de porta **ainda não está implementada**: falta confirmar o protocolo/SDK oficial, o provisionamento e as credenciais de autorização. A ferramenta **não** substitui o sistema BIS Hotel nem interfere nos cartões MIFARE.
 
+## Diagnóstico automatizado pelo VS Code
+
+Abra o repositório no **VS Code instalado no computador Windows que tem Bluetooth**.
+Instale o SDK **.NET 10** e abra **Terminal → Run Task / Executar Tarefa**. As tarefas disponíveis são:
+
+- **Saga BLE: autoteste sem fechadura** — testa o código sem depender do rádio Bluetooth.
+- **Saga BLE: varredura automática (30 segundos)** — escuta anúncios e salva `diagnostics/saga-scan.json`.
+- **Saga BLE: inspecionar endereço (30 segundos)** — solicita o endereço BLE que apareceu na varredura, faz nova busca, conecta apenas se o dispositivo estiver presente e exporta metadados GATT em `diagnostics/saga-gatt.json`.
+
+Os arquivos da pasta `diagnostics/` são ignorados pelo Git, mas **continuam sensíveis e não devem ser publicados**.
+
+**Nenhuma das tarefas abre ou destrava a porta.** O comando de abertura só poderá ser implementado com documentação/SDK e uma credencial válida do fabricante. O GitHub Actions testa apenas software; a varredura física acontece exclusivamente no computador com a fechadura.
+
+Também é possível automatizar a inspeção no terminal:
+
+    dotnet run --project src/SagaBle.Diagnostic/SagaBle.Diagnostic.csproj -- --scan 30 --inspect AA:BB:CC:DD:EE:FF --export diagnostics/saga-gatt.json
+
+O endereço deve ser real e ter sido detectado na varredura; o programa rejeita endereços ausentes.
+
 ## Executável Windows
 
 Baixe o arquivo **SagaBleDiagnostico-Windows-x64** na aba [Actions](https://github.com/wfuzatto/bluetooth_saga/actions) → execução **Compilar diagnóstico Bluetooth Windows** → **Artifacts**. Extraia o ZIP e execute **SagaBleDiagnostico.exe**. É necessário Windows 10 (2004+) ou Windows 11 e adaptador compatível com BLE.
