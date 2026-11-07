@@ -1,4 +1,4 @@
-# Inspeção de estrutura do relatório BLE sem publicar endereços ou dados do fabricante.
+﻿# Inspeção de estrutura do relatório BLE sem publicar endereços ou dados do fabricante.
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)][string]$Path,

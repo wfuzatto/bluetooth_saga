@@ -24,6 +24,7 @@ A primeira varredura **não exige código PIN ou número de fechadura**. Esse ti
 - Saga BLE: 03 - Somente varredura (sem interação) — BLE e exportação JSON.
 - Saga BLE: 04 - Inspecionar GATT com endereço escolhido — endereço proveniente de varredura anterior.
 - Saga BLE: 05 - Validar estrutura de um relatório — lê relatório JSON local sem imprimir identificadores.
+- Saga BLE: 06 - Inspecionar janela breve por nome exato — aguarda um anúncio conectável pelo nome informado e inicia GATT assim que ele aparece.
 - Saga BLE: compilar (Debug/Release) — build do projeto.
 
 **Depuração:** pressione F5 e escolha scanner ou modo interativo configurado em .vscode/launch.json.

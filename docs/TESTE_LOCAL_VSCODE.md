@@ -7,6 +7,8 @@
 - VS Code e extensões recomendadas C# e PowerShell.
 - SDK .NET 10 instalado: https://dotnet.microsoft.com/download/dotnet/10.0
 
+No Windows PowerShell 5.1 (`powershell.exe`), mantenha os scripts `scripts/*.ps1` em UTF-8 com BOM. Sem o BOM, caracteres tipográficos podem ser interpretados incorretamente e impedir a tarefa de iniciar.
+
 Abra a pasta raiz do repositório no VS Code. A varredura inicial não exige código/PIN da fechadura. O acesso a eventuais credenciais de abertura é uma etapa separada.
 
 ## Um comando para começar
@@ -24,6 +26,8 @@ A tarefa executa scripts/Test-SagaBle.ps1 e:
 
 Arquivos gerados em diagnostics/scan-AAAAMMDD-HHMMSS.json e diagnostics/gatt-AAAAMMDD-HHMMSS.json. A pasta é ignorada pelo Git, mas contém dados potencialmente identificáveis e não deve ser publicada.
 
+O relatório da varredura registra também o tipo de endereço e de anúncio, incluindo as contagens de anúncios conectáveis, escaneáveis e respostas a scan request. Isso ajuda a distinguir um anúncio que pode aceitar GATT de um beacon não conectável.
+
 ## Tarefas disponíveis
 
 - 00 — Diagnóstico completo guiado: tudo até a descoberta GATT.
@@ -32,6 +36,7 @@ Arquivos gerados em diagnostics/scan-AAAAMMDD-HHMMSS.json e diagnostics/gatt-AAA
 - 03 — Somente varredura: scan e JSON sem perguntas.
 - 04 — Inspecionar GATT com endereço escolhido: endereço já identificado; repete scan.
 - 05 — Validar estrutura de um relatório: contagens e estados sem exibir MACs.
+- 06 — Inspecionar janela breve por nome exato: inicia GATT assim que o anúncio conectável único com esse nome aparece; útil para um botão que só ativa o BLE por pouco tempo.
 - Compilar (Debug/Release): código.
 - F5: configurações para depurar scanner ou menu interativo.
 
@@ -57,3 +62,5 @@ O endereço deve aparecer na varredura e ser identificado pelo operador. NÃO se
 Confirmar referência e firmware do módulo, UUIDs documentados, autenticação, credenciais temporárias, chaves de acesso, revogação no checkout, coexistência com cartões MIFARE/BIS Hotel, disponibilidade offline e forma de validar abertura física.
 
 Não implementar escrita GATT por tentativa e erro. Nunca inserir credenciais em commits, settings do VS Code ou logs públicos.
+
+Para uma janela curta, escolha a tarefa 06, informe o nome exato observado na tarefa 00 e aperte o botão da placa somente quando o scanner estiver ativo. A conexão tenta apenas descobrir serviços/características; não faz pareamento nem lê ou escreve valores.

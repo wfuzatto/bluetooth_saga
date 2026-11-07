@@ -1,8 +1,9 @@
-# Diagnóstico controlado por VS Code. Nunca escreve no dispositivo BLE.
+﻿# Diagnóstico controlado por VS Code. Nunca escreve no dispositivo BLE.
 [CmdletBinding()]
 param(
     [ValidateRange(3,120)][int]$Seconds = 30,
     [string]$Address = "",
+    [string]$Name = "",
     [switch]$PreflightOnly,
     [switch]$OfflineOnly,
     [switch]$NonInteractive
@@ -16,10 +17,11 @@ function Step([string]$Message) {
     Write-Host ("=== " + $Message + " ===") -ForegroundColor Cyan
 }
 
-function Invoke-DotNetCommand([string[]]$Arguments) {
+function Invoke-DotNetCommand([string[]]$Arguments, [int[]]$AllowedExitCodes = @(0)) {
     & dotnet @Arguments
-    if ($LASTEXITCODE -ne 0) {
-        throw ("dotnet falhou (código " + $LASTEXITCODE + "): " + ($Arguments -join " "))
+    $script:LastDotNetExitCode = $LASTEXITCODE
+    if ($script:LastDotNetExitCode -notin $AllowedExitCodes) {
+        throw ("dotnet falhou (código " + $script:LastDotNetExitCode + "): " + ($Arguments -join " "))
     }
 }
 
@@ -98,6 +100,38 @@ try {
 
     New-Item -ItemType Directory -Path $reports -Force | Out-Null
     $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
+
+    if (-not [string]::IsNullOrWhiteSpace($Name)) {
+        $targetName = $Name.Trim()
+        $gattPath = Join-Path $reports ("gatt-name-" + $stamp + ".json")
+        Step "Aguardar anúncio conectável com o nome exato '$targetName' por até $Seconds segundos"
+        Invoke-DotNetCommand @('run','--project',$project,'--configuration','Release','--no-build','--',
+            '--scan',"$Seconds",'--inspect-name',$targetName,'--export',$gattPath) @(0,3,4)
+        $gattExit = $script:LastDotNetExitCode
+
+        if (-not (Test-Path -LiteralPath $gattPath)) {
+            throw "O scanner terminou sem criar o relatório GATT: $gattPath"
+        }
+        if ($gattExit -eq 3) {
+            & $analyzer -Path $gattPath -ExpectInspections 0
+            Write-Warning "O anúncio conectável '$targetName' não apareceu; nenhuma conexão GATT foi tentada."
+            Write-Host "Relatório local: $gattPath"
+            exit 3
+        }
+
+        & $analyzer -Path $gattPath -ExpectInspections 1
+        if (-not $?) { throw "Validação do relatório GATT falhou." }
+        if ($gattExit -eq 4) {
+            Write-Warning "Anúncio encontrado, mas o Windows não concluiu a descoberta GATT."
+            Write-Host "Relatório local: $gattPath"
+            exit 4
+        }
+
+        Write-Host "Descoberta GATT concluída sem ler valores ou escrever características." -ForegroundColor Green
+        Write-Host "Relatório local: $gattPath"
+        exit 0
+    }
+
     $scanPath = Join-Path $reports ("scan-" + $stamp + ".json")
 
     Step "Escanear Bluetooth Low Energy por $Seconds segundos"

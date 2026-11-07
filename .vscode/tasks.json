@@ -108,6 +108,24 @@
       "group": "test"
     },
     {
+      "label": "Saga BLE: 06 - Inspecionar janela breve por nome exato",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/Test-SagaBle.ps1",
+        "-Seconds",
+        "120",
+        "-Name",
+        "${input:sagaBleExactName}"
+      ],
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
       "label": "Saga BLE: compilar (Debug)",
       "type": "process",
       "command": "dotnet",
@@ -147,6 +165,11 @@
       "type": "promptString",
       "description": "Caminho do JSON local a validar",
       "default": "diagnostics/saga-scan.json"
+    },
+    {
+      "id": "sagaBleExactName",
+      "type": "promptString",
+      "description": "Nome BLE exato e único que deve anunciar conectável"
     }
   ]
 }
