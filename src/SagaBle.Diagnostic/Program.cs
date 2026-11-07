@@ -46,13 +46,43 @@ internal static class Program
 
                 int seconds = (args.Length > 1 && int.TryParse(args[1], out var parsed)) ? parsed : 20;
                 await ScanAndShowAsync(ble, seconds);
+
+                int inspectIndex = Array.IndexOf(args, "--inspect");
+                if (inspectIndex >= 0)
+                {
+                    if (inspectIndex + 1 >= args.Length ||
+                        !Addressing.TryParse(args[inspectIndex + 1], out ulong address))
+                    {
+                        Console.Error.WriteLine("Use --inspect AA:BB:CC:DD:EE:FF com endereço válido.");
+                        return 2;
+                    }
+
+                    if (ble.Snapshot().All(x => x.AddressValue != address))
+                    {
+                        Console.Error.WriteLine("Endereço não observado nesta varredura. Nenhuma conexão GATT foi tentada.");
+                        return 3;
+                    }
+
+                    Console.WriteLine("Inspeção GATT de metadados (sem leitura de valores ou escrita)...");
+                    var inspection = await ble.InspectAsync(address);
+                    inspections.Add(inspection);
+                    Console.WriteLine($"Dispositivo: {inspection.Address}; nome: {inspection.Name}; status: {inspection.Status}");
+                    foreach (var service in inspection.Services)
+                    {
+                        Console.WriteLine($"Serviço {service.Uuid}: {service.Status}");
+                        foreach (var characteristic in service.Characteristics)
+                            Console.WriteLine($"  {characteristic.Uuid} | {characteristic.Properties} | handle {characteristic.Handle}");
+                    }
+                }
+
                 int exportIndex = Array.IndexOf(args, "--export");
                 if (exportIndex >= 0)
                 {
                     var path = exportIndex + 1 < args.Length ? args[exportIndex + 1] : null;
                     Save(ble, inspections, path);
                 }
-                return 0;
+
+                return inspections.Count > 0 && inspections[0].Status != "Success" ? 4 : 0;
             }
 
             await ScanAndShowAsync(ble, 20);
@@ -193,6 +223,7 @@ internal static class Program
         Console.WriteLine("SagaBleDiagnostico.exe             abre menu interativo");
         Console.WriteLine("SagaBleDiagnostico.exe --scan 30   varredura por 30 segundos e sai");
         Console.WriteLine("SagaBleDiagnostico.exe --scan 30 --export C:\\Temp\\saga.json");
+        Console.WriteLine("SagaBleDiagnostico.exe --scan 30 --inspect AA:BB:CC:DD:EE:FF --export C:\\Temp\\saga.json");
         Console.WriteLine("SagaBleDiagnostico.exe --self-test valida utilitários sem hardware");
     }
 }
