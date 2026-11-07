@@ -1,66 +1,54 @@
-# Bluetooth Saga — diagnóstico BLE de fechaduras hoteleiras
+# Bluetooth Saga — laboratório BLE para fechaduras Saga Systems
 
-Projeto de integração para fechadura Saga Systems com módulo fotografado **HB2546**.
+Ferramenta Windows C#/.NET para diagnóstico do módulo fotografado HB2546 em fechadura hoteleira Saga Systems. Preserva a operação de cartões MIFARE/BIS Hotel, sem alterar a fechadura.
 
-**Estado real:** o diagnóstico BLE foi implementado no código. A abertura de porta **ainda não está implementada**: falta confirmar o protocolo/SDK oficial, o provisionamento e as credenciais de autorização. A ferramenta **não** substitui o sistema BIS Hotel nem interfere nos cartões MIFARE.
+**Situação atual:** scanner Bluetooth LE, identificação de anúncios, inspeção de metadados GATT, exportação local de JSON, tarefas VS Code e testes offline. **Não abre portas ainda.** O protocolo e a credencial de abertura oficial da placa não foram identificados.
 
-## Diagnóstico automatizado pelo VS Code
+## Comece aqui no VS Code
 
-Abra o repositório no **VS Code instalado no computador Windows que tem Bluetooth**.
-Instale o SDK **.NET 10** e abra **Terminal → Run Task / Executar Tarefa**. As tarefas disponíveis são:
+1. Clone ou atualize https://github.com/wfuzatto/bluetooth_saga no **Windows que está próximo à fechadura**.
+2. Instale o SDK .NET 10 em https://dotnet.microsoft.com/download/dotnet/10.0 e use VS Code com as extensões C# e PowerShell sugeridas.
+3. Abra a pasta raiz do repositório no VS Code.
+4. Pressione Ctrl+Shift+P, escolha Tasks: Run Task e **Saga BLE: 00 - Diagnóstico completo (guiado)**.
+5. O VS Code verificará pré-requisitos, compilará, executará autotestes, escaneará Bluetooth LE por 30 segundos e listará os dispositivos observados.
+6. Escolha o número do dispositivo identificado como sendo a sua fechadura (ou ENTER para não consultar nenhum). Só o dispositivo escolhido será examinado por GATT, e apenas seus metadados.
+7. Os JSONs ficam na pasta privada e ignorada pelo Git: diagnostics/. Não publique os resultados brutos no GitHub.
 
-- **Saga BLE: autoteste sem fechadura** — testa o código sem depender do rádio Bluetooth.
-- **Saga BLE: varredura automática (30 segundos)** — escuta anúncios e salva `diagnostics/saga-scan.json`.
-- **Saga BLE: inspecionar endereço (30 segundos)** — solicita o endereço BLE que apareceu na varredura, faz nova busca, conecta apenas se o dispositivo estiver presente e exporta metadados GATT em `diagnostics/saga-gatt.json`.
+A primeira varredura **não exige código PIN ou número de fechadura**. Esse tipo de informação só será necessário se o fabricante requerer provisionamento ou autenticação para outras funções. Um serviço GATT encontrado não comprova a identidade do módulo nem permite inventar um comando de abertura.
 
-Os arquivos da pasta `diagnostics/` são ignorados pelo Git, mas **continuam sensíveis e não devem ser publicados**.
+## Tarefas disponíveis
 
-**Nenhuma das tarefas abre ou destrava a porta.** O comando de abertura só poderá ser implementado com documentação/SDK e uma credencial válida do fabricante. O GitHub Actions testa apenas software; a varredura física acontece exclusivamente no computador com a fechadura.
+- Saga BLE: 00 - Diagnóstico completo (guiado) — fluxo recomendado, termina com análise GATT quando um dispositivo é escolhido.
+- Saga BLE: 01 - Pré-requisitos Windows — verifica ambiente.
+- Saga BLE: 02 - Testes completos offline (sem fechadura) — build, self-test e fixture sintética.
+- Saga BLE: 03 - Somente varredura (sem interação) — BLE e exportação JSON.
+- Saga BLE: 04 - Inspecionar GATT com endereço escolhido — endereço proveniente de varredura anterior.
+- Saga BLE: 05 - Validar estrutura de um relatório — lê relatório JSON local sem imprimir identificadores.
+- Saga BLE: compilar (Debug/Release) — build do projeto.
 
-Também é possível automatizar a inspeção no terminal:
+**Depuração:** pressione F5 e escolha scanner ou modo interativo configurado em .vscode/launch.json.
 
-    dotnet run --project src/SagaBle.Diagnostic/SagaBle.Diagnostic.csproj -- --scan 30 --inspect AA:BB:CC:DD:EE:FF --export diagnostics/saga-gatt.json
+Para teste local também é possível abrir um terminal PowerShell:
 
-O endereço deve ser real e ter sido detectado na varredura; o programa rejeita endereços ausentes.
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-SagaBle.ps1 -OfflineOnly
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-SagaBle.ps1 -Seconds 30
 
-## Executável Windows
+## Código e documentos
 
-Baixe o arquivo **SagaBleDiagnostico-Windows-x64** na aba [Actions](https://github.com/wfuzatto/bluetooth_saga/actions) → execução **Compilar diagnóstico Bluetooth Windows** → **Artifacts**. Extraia o ZIP e execute **SagaBleDiagnostico.exe**. É necessário Windows 10 (2004+) ou Windows 11 e adaptador compatível com BLE.
+- src/SagaBle.Diagnostic — scanner e explorador GATT do Windows.
+- scripts/Test-SagaBle.ps1 — orquestrador do laboratório local e validação offline.
+- scripts/Analyze-Report.ps1 — validador de relatório.
+- tests/fixtures/ble-sintetico.json — simulação sem hardware.
+- .vscode/tasks.json e .vscode/launch.json — execução e depuração.
+- AGENTS.md — procedimentos e limites para agentes de programação no VS Code.
+- docs/TESTE_LOCAL_VSCODE.md — manual completo, incluindo falhas e interpretações.
+- docs/INTEGRACAO_ABERTURA.md — contrato da futura abertura homologada.
+- docs/PROTOCOL_AND_SECURITY.md — roteiro de identificação e segurança.
 
-O EXE é publicado como arquivo único autossuficiente (.NET 10), sem necessidade de instalação separada do runtime.
+## Executável compilado no GitHub
 
-## Usar no computador próximo à fechadura
+Acesse https://github.com/wfuzatto/bluetooth_saga/actions e abra a execução concluída do workflow **Compilar e testar diagnóstico Bluetooth Saga**. Em Artifacts, baixe SagaBleDiagnostico-Windows-x64 (ZIP), extraia o EXE e rode no PC Windows com BLE. O EXE é autossuficiente, mas as tarefas de VS Code baseadas em código-fonte exigem SDK .NET 10.
 
-1. Deixe o Bluetooth do Windows ativo e aproxime o computador da fechadura ligada.
-2. Abra **SagaBleDiagnostico.exe**; o programa faz uma varredura de 20 segundos.
-3. Veja nome, endereço BLE, RSSI e quantidade de UUIDs anunciados.
-4. Escolha **2** para inspecionar os serviços e as características GATT do dispositivo selecionado.
-5. Escolha **3** para exportar um JSON local (por padrão em %LOCALAPPDATA%/BluetoothSaga/Relatorios).
-6. Guarde o relatório de forma privada. O endereço Bluetooth, UUIDs e dados do fabricante podem identificar equipamentos.
+**Limitações importantes:** o GitHub Actions roda em máquina remota sem acesso ao Bluetooth deste hotel. A compilação e o teste com dados sintéticos não substituem um teste físico, não demonstram abertura e não identificam o protocolo do módulo. A integração de abertura só pode avançar após a especificação e o provisionamento/autorização oficial da Saga/VEGA.
 
-O scanner não realiza abertura, tentativa de senha, escrita ou leitura de valores de características. A inspeção GATT pode iniciar uma conexão BLE de descoberta, sem alteração da fechadura.
-
-Se a placa não aparecer, ela pode estar em repouso, não provisionada, sem alimentação correta ou usando um método de comunicação diferente. Não é possível concluir que a placa está com defeito apenas pela varredura.
-
-## Execução via terminal
-
-    .\SagaBleDiagnostico.exe
-    .\SagaBleDiagnostico.exe --scan 30
-    .\SagaBleDiagnostico.exe --scan 30 --export C:\Temp\saga.json
-    .\SagaBleDiagnostico.exe --self-test
-
-## Desenvolvimento
-
-O código está em src/SagaBle.Diagnostic, em C#/.NET, utilizando as APIs nativas Windows Bluetooth LE. A compilação é configurada no GitHub Actions para Windows x64.
-
-    dotnet build src/SagaBle.Diagnostic/SagaBle.Diagnostic.csproj -c Release
-    dotnet run --project src/SagaBle.Diagnostic/SagaBle.Diagnostic.csproj -c Release
-
-O fluxo para integrar abertura autenticada, perguntas ao fabricante e salvaguardas está em [docs/PROTOCOL_AND_SECURITY.md](docs/PROTOCOL_AND_SECURITY.md).
-
-### Limitações
-
-- O GitHub Actions só compila/testa em uma máquina remota: **não consegue acessar o Bluetooth do seu computador**.
-- Nenhum UUID observado na varredura comprova sozinho o protocolo de abertura.
-- Sem documentação e credenciais homologadas, **não existe botão de destravamento funcional** neste projeto.
-- Não suba logs de diagnóstico, credenciais ou identificadores do hotel em issues públicas.
+Não execute comandos arbitrários, scripts que escrevam em características GATT, tentativa de PIN ou reset. Nunca publique PIN, chaves digitais, dados de hóspedes, endereços BLE ou logs brutos no repositório público.
